@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Espace Chargé d'Affaires</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="navbar">
+        <div>
+            <span class="user-badge">Utilisateur : <strong id="user-name">...</strong></span>
+            <span class="user-badge">Métier : <strong id="user-metier">...</strong></span>
+        </div>
+        <a href="/logout" class="btn-logout">Déconnexion</a>
+    </div>
+
+    <div class="container-large">
+        <div style="max-width: 500px; margin: 0 auto 40px auto;">
+            <h2>Saisie Nouvelle Commande</h2>
+            
+            <div id="success-alert" class="alert-success" style="display: none;">
+                Commande enregistrée avec succès !
+            </div>
+
+            <form action="/api/commandes" method="POST">
+                <div class="form-group">
+                    <label>Numéro de Commande</label>
+                    <input type="text" name="num_commande" placeholder="Ex: CMD-2026-001" required autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                    <label>Nom du Projet</label>
+                    <input type="text" name="projet" placeholder="Ex: Renouvellement BT..." required autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                    <label>Montant (DH)</label>
+                    <input type="number" step="0.01" name="montant" placeholder="0.00" required autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                    <label>État de la commande</label>
+                    <select name="etat" required>
+                        <option value="En état de transfert">En état de transfert</option>
+                        <option value="En cours de validation">En cours de validation</option>
+                        <option value="Validé">Validé</option>
+                    </select>
+                </div>
+
+                <button type="submit">Enregistrer la commande</button>
+            </form>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid #cbd5e1; margin: 40px 0;">
+
+        <h2>Mon Historique de Saisie</h2>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>N° Commande</th>
+                        <th>Projet</th>
+                        <th>Montant</th>
+                        <th>État</th>
+                    </tr>
+                </thead>
+                <tbody id="history-body">
+                    <tr><td colspan="4" style="text-align:center;">Chargement de l'historique...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Infos utilisateur
+        fetch('/api/user-info')
+            .then(res => res.json())
+            .then(user => {
+                document.getElementById('user-name').innerText = user.username.toUpperCase();
+                document.getElementById('user-metier').innerText = user.metier;
+            });
+
+        // Charger l'historique du CA connecté
+        fetch('/api/commandes/mes-saisies')
+            .then(res => res.json())
+            .then(data => {
+                const tbody = document.getElementById('history-body');
+                tbody.innerHTML = '';
+                if(data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Aucune commande saisie pour le moment.</td></tr>`;
+                    return;
+                }
+                data.forEach(cmd => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${cmd.num_commande}</td>
+                            <td>${cmd.projet}</td>
+                            <td>${cmd.montant.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} DH</td>
+                            <td><span class="badge-etat">${cmd.etat}</span></td>
+                        </tr>
+                    `;
+                });
+            });
+
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('success') === 'true') {
+            document.getElementById('success-alert').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('success-alert').style.display = 'none';
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

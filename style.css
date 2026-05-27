@@ -1,0 +1,123 @@
+/* Styles Généraux */
+body { 
+    font-family: 'Segoe UI', Arial, sans-serif; 
+    background-color: #f4f6f9; 
+    margin: 0; 
+    padding: 0; 
+    color: #333; 
+}
+
+/* Barre de Navigation (Navbar) */
+.navbar { 
+    background-color: #1e293b; 
+    color: white; 
+    padding: 15px 30px; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.user-badge { 
+    background-color: #334155; 
+    padding: 6px 12px; 
+    border-radius: 4px; 
+    margin-right: 10px; 
+    font-size: 0.9em; 
+}
+.btn-logout { 
+    color: #f87171; 
+    text-decoration: none; 
+    font-weight: bold; 
+}
+.btn-logout:hover { text-decoration: underline; }
+
+/* Conteneurs */
+.login-container { 
+    max-width: 400px; 
+    margin: 100px auto; 
+    padding: 40px; 
+    background: white; 
+    border-radius: 8px; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
+}
+.login-header { text-align: center; margin-bottom: 30px; }
+.login-header h2 { margin: 0; color: #1e293b; font-size: 2em; }
+.login-header p { margin: 5px 0 0 0; color: #64748b; }
+
+.container { 
+    max-width: 500px; 
+    margin: 40px auto; 
+    padding: 30px; 
+    background: white; 
+    border-radius: 8px; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+}
+.container-large { 
+    max-width: 1100px; 
+    margin: 40px auto; 
+    padding: 30px; 
+    background: white; 
+    border-radius: 8px; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+}
+
+/* Formulaires */
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #475569; }
+input, select { 
+    width: 100%; 
+    padding: 10px; 
+    border: 1px solid #cbd5e1; 
+    border-radius: 4px; 
+    box-sizing: border-box; 
+    font-size: 100%;
+}
+input:focus, select:focus { outline: 2px solid #3b82f6; }
+button { 
+    width: 100%; 
+    padding: 12px; 
+    background-color: #2563eb; 
+    color: white; 
+    border: none; 
+    border-radius: 4px; 
+    font-weight: bold; 
+    cursor: pointer; 
+    font-size: 1em;
+}
+button:hover { background-color: #1d4ed8; }
+
+/* Alertes */
+.alert-success { 
+    background-color: #dcfce7; 
+    color: #15803d; 
+    padding: 12px; 
+    border-radius: 4px; 
+    margin-bottom: 20px; 
+    font-weight: bold; 
+    text-align: center;
+}
+
+/* Tableaux (Vue Responsable) */
+.table-responsive { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; }
+th, td { padding: 14px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+th { background-color: #334155; color: white; font-weight: 600; }
+
+/* CODE COULEUR STRICT PAR MÉTIER (Lignes du tableau) */
+.row-elec { background-color: #fef2f2; color: #991b1b; }       /* Fond rouge très clair, texte rouge foncé */
+.row-elec td strong { color: #dc2626; }
+
+.row-assain { background-color: #f0fdf4; color: #166534; }     /* Fond vert très clair, texte vert foncé */
+.row-assain td strong { color: #16a34a; }
+
+.row-eau { background-color: #f0f9ff; color: #075985; }        /* Fond bleu très clair, texte bleu foncé */
+.row-eau td strong { color: #0284c7; }
+
+.badge-etat { 
+    background: white; 
+    padding: 4px 8px; 
+    border-radius: 4px; 
+    border: 1px solid #cbd5e1; 
+    font-size: 0.9em; 
+    font-weight: 500;
+}

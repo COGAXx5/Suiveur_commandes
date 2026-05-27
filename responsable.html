@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau de Bord Responsable</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .filter-container {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 20px;
+        }
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .filter-group select {
+            width: auto;
+            padding: 6px 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div>
+            <span class="user-badge">Espace : <strong>Responsable / Chef de service</strong></span>
+        </div>
+        <a href="/logout" class="btn-logout">Déconnexion</a>
+    </div>
+
+    <div class="container-large">
+        <h2>Suivi Global des Commandes</h2>
+        
+        <!-- Zone des Filtres Rapides -->
+        <div class="filter-container">
+            <div class="filter-group">
+                <label><strong>Filtrer par Métier :</strong></label>
+                <select id="filter-metier" onchange="filtrerTableau()">
+                    <option value="Tous">Tous les métiers</option>
+                    <option value="Assainissement">Assainissement</option>
+                    <option value="Eau">Eau Potable</option>
+                    <option value="Electricite">Électricité</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label><strong>Filtrer par État :</strong></label>
+                <select id="filter-etat" onchange="filtrerTableau()">
+                    <option value="Tous">Tous les états</option>
+                    <option value="En état de transfert">En état de transfert</option>
+                    <option value="En cours de validation">En cours de validation</option>
+                    <option value="Validé">Validé</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Métier</th>
+                        <th>N° Commande</th>
+                        <th>Projet</th>
+                        <th>Montant</th>
+                        <th>État</th>
+                        <th>Saisi par</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <!-- Données dynamiques -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let toutesLesCommandes = []; // Stockage local des données pour le filtrage rapide
+
+        // Charger les données triées par le serveur
+        fetch('/api/commandes/all')
+            .then(res => {
+                if (res.status === 403) {
+                    alert("Accès refusé");
+                    window.location.href = '/';
+                    return;
+                }
+                return res.json();
+            })
+            .then(data => {
+                toutesLesCommandes = data;
+                afficherDonnees(toutesLesCommandes);
+            })
+            .catch(err => console.error("Erreur :", err));
+
+        // Fonction d'affichage brute
+        function afficherDonnees(commandes) {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+
+            if (commandes.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Aucune commande ne correspond aux critères.</td></tr>`;
+                return;
+            }
+
+            commandes.forEach(cmd => {
+                let classeMetier = '';
+                if (cmd.metier === 'Electricite') classeMetier = 'row-elec';
+                if (cmd.metier === 'Assainissement') classeMetier = 'row-assain';
+                if (cmd.metier === 'Eau') classeMetier = 'row-eau';
+
+                tbody.innerHTML += `
+                    <tr class="${classeMetier}">
+                        <td><strong>${cmd.metier}</strong></td>
+                        <td>${cmd.num_commande}</td>
+                        <td>${cmd.projet}</td>
+                        <td>${cmd.montant.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} DH</td>
+                        <td><span class="badge-etat">${cmd.etat}</span></td>
+                        <td>${cmd.cree_par.toUpperCase()}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Logique de filtrage combinée
+        function filtrerTableau() {
+            const metierSelectionne = document.getElementById('filter-metier').value;
+            const etatSelectionne = document.getElementById('filter-etat').value;
+
+            const donneesFiltrees = toutesLesCommandes.filter(cmd => {
+                const matchMetier = (metierSelectionne === 'Tous' || cmd.metier === metierSelectionne);
+                const matchEtat = (etatSelectionne === 'Tous' || cmd.etat === etatSelectionne);
+                return matchMetier && matchEtat;
+            });
+
+            afficherDonnees(donneesFiltrees);
+        }
+    </script>
+</body>
+</html>
