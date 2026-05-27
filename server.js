@@ -104,3 +104,4 @@ app.get('/logout', (req, res) => {
 // Port dynamique pour s'adapter à Render ou basculer en local sur le 3000
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => { console.log(`Serveur actif sur le port : ${PORT}`); });
+module.exports = app;
