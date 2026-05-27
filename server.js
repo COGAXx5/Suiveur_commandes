@@ -1,11 +1,14 @@
 const express = require('express');
 const session = require('express-session');
-const db = require('./database'); // Utilise maintenant le pool PostgreSQL
+const path = require('path'); // Ajouté pour la gestion des chemins
+const db = require('./database'); 
 const app = express();
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(express.static(__dirname));
+
+// Correction Vercel pour servir les fichiers statiques à la racine
+app.use(express.static(path.join(__dirname, '.')));
 
 app.use(session({
     secret: 'srmcs_secret_key_2026',
@@ -13,13 +16,17 @@ app.use(session({
     saveUninitialized: false
 }));
 
+// Route obligatoire pour forcer Vercel à afficher index.html à la racine (/)
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 // 1. Route de connexion
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
     try {
-        // En PostgreSQL, les placeholders sont $1, $2, etc.
         const result = await db.query("SELECT * FROM users WHERE LOWER(username) = $1", [username.toLowerCase()]);
-        const user = result.rows[0]; // Les résultats sont dans result.rows
+        const user = result.rows[0]; 
 
         if (user && user.password === password) {
             req.session.userId = user.id;
@@ -101,7 +108,7 @@ app.get('/logout', (req, res) => {
     req.session.destroy(() => { res.redirect('/'); });
 });
 
-// Port dynamique pour s'adapter à Render ou basculer en local sur le 3000
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => { console.log(`Serveur actif sur le port : ${PORT}`); });
-module.exports = app;
+
+module.exports = app; // Indispensable pour Vercel
