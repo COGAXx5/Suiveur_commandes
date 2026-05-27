@@ -15,7 +15,11 @@ app.use(session({
     resave: false,
     saveUninitialized: false
 }));
-
+// Force le bon type MIME pour le fichier CSS
+app.get('/style.css', (req, res) => {
+    res.setHeader('Content-Type', 'text/css');
+    res.sendFile(path.join(__dirname, 'style.css'));
+});
 // Déclaration explicite de toutes les routes HTML pour Vercel
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
