@@ -1,6 +1,6 @@
 const express = require('express');
 const session = require('express-session');
-const path = require('path'); // Ajouté pour la gestion des chemins
+const path = require('path'); 
 const db = require('./database'); 
 const app = express();
 
@@ -16,9 +16,17 @@ app.use(session({
     saveUninitialized: false
 }));
 
-// Route obligatoire pour forcer Vercel à afficher index.html à la racine (/)
+// Déclaration explicite de toutes les routes HTML pour Vercel
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+app.get('/saisie.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'saisie.html'));
+});
+
+app.get('/responsable.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'responsable.html'));
 });
 
 // 1. Route de connexion
@@ -111,4 +119,4 @@ app.get('/logout', (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => { console.log(`Serveur actif sur le port : ${PORT}`); });
 
-module.exports = app; // Indispensable pour Vercel
+module.exports = app;
