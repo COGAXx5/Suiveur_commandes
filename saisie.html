@@ -63,16 +63,41 @@
                         <th>Projet</th>
                         <th>Montant</th>
                         <th>État</th>
+                        <th>Dernière Modification</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody id="history-body">
-                    <tr><td colspan="4" style="text-align:center;">Chargement de l'historique...</td></tr>
+                    <tr><td colspan="6" style="text-align:center;">Chargement de l'historique...</td></tr>
                 </tbody>
             </table>
+        </div>
+
+        <div id="edit-section" style="display: none; max-width: 500px; margin: 40px auto 0 auto; padding: 20px; border: 1px solid #cbd5e1; border-radius: 8px; background-color: #f8fafc;">
+            <h2>Modifier la Commande : <span id="edit-cmd-label"></span></h2>
+            <form id="edit-form">
+                <input type="hidden" id="edit-id">
+                
+                <div class="form-group">
+                    <label>État de la commande</label>
+                    <select id="edit-etat" required>
+                        <option value="En état de transfert">En état de transfert</option>
+                        <option value="En cours de validation">En cours de validation</option>
+                        <option value="Validé">Validé</option>
+                    </select>
+                </div>
+                
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" style="flex: 1;">Enregistrer les modifications</button>
+                    <button type="button" onclick="cancelEdit()" style="flex: 1; background-color: #64748b;">Annuler</button>
+                </div>
+            </form>
         </div>
     </div>
 
     <script>
+        let commandesEnCours = [];
+
         // Infos utilisateur
         fetch('/api/user-info')
             .then(res => res.json())
@@ -82,26 +107,85 @@
             });
 
         // Charger l'historique du CA connecté
-        fetch('/api/commandes/mes-saisies')
-            .then(res => res.json())
-            .then(data => {
-                const tbody = document.getElementById('history-body');
-                tbody.innerHTML = '';
-                if(data.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Aucune commande saisie pour le moment.</td></tr>`;
-                    return;
-                }
-                data.forEach(cmd => {
-                    tbody.innerHTML += `
-                        <tr>
-                            <td>${cmd.num_commande}</td>
-                            <td>${cmd.projet}</td>
-                            <td>${cmd.montant.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} DH</td>
-                            <td><span class="badge-etat">${cmd.etat}</span></td>
-                        </tr>
-                    `;
+        function loadHistory() {
+            fetch('/api/commandes/mes-saisies')
+                .then(res => res.json())
+                .then(data => {
+                    commandesEnCours = data;
+                    const tbody = document.getElementById('history-body');
+                    tbody.innerHTML = '';
+                    
+                    if(data.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Aucune commande saisie pour le moment.</td></tr>`;
+                        return;
+                    }
+                    
+                    data.forEach(cmd => {
+                        const dateRef = cmd.updated_at || cmd.created_at;
+                        const dateFormatee = dateRef ? new Date(dateRef).toLocaleDateString('fr-FR') : '-';
+
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${cmd.num_commande}</td>
+                                <td>${cmd.projet}</td>
+                                <td>${cmd.montant.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} DH</td>
+                                <td><span class="badge-etat">${cmd.etat}</span></td>
+                                <td>${dateFormatee}</td>
+                                <td>
+                                    <button class="btn-edit" onclick="openEdit('${cmd.id}')" style="padding: 4px 8px; font-size: 12px; background-color: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer;">Modifier</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
                 });
-            });
+        }
+
+        loadHistory();
+
+        // Ouvrir le panneau de modification
+        function openEdit(id) {
+            const cmd = commandesEnCours.find(c => String(c.id) === String(id));
+            if (!cmd) return;
+
+            document.getElementById('edit-id').value = cmd.id;
+            document.getElementById('edit-cmd-label').innerText = cmd.num_commande;
+            document.getElementById('edit-etat').value = cmd.etat;
+            
+            document.getElementById('edit-section').style.display = 'block';
+            document.getElementById('edit-section').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Annuler la modification
+        function cancelEdit() {
+            document.getElementById('edit-section').style.display = 'none';
+            document.getElementById('edit-form').reset();
+        }
+
+        // Soumettre la modification
+        document.getElementById('edit-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const id = document.getElementById('edit-id').value;
+            const nouvelEtat = document.getElementById('edit-etat').value;
+
+            fetch(`/api/commandes/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ etat: nouvelEtat })
+            })
+            .then(res => {
+                if (res.ok) {
+                    cancelEdit();
+                    loadHistory();
+                    document.getElementById('success-alert').style.display = 'block';
+                    setTimeout(() => document.getElementById('success-alert').style.display = 'none', 3000);
+                } else {
+                    alert("Erreur lors de la mise à jour de l'état.");
+                }
+            })
+            .catch(err => console.error("Erreur:", err));
+        });
 
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('success') === 'true') {
