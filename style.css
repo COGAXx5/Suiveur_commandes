@@ -17,13 +17,20 @@ body {
     align-items: center; 
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
-.user-badge { 
-    background-color: #334155; 
-    padding: 6px 12px; 
-    border-radius: 4px; 
-    margin-right: 10px; 
+
+/* Alignement vertical et à gauche du profil (Nom + Métier) */
+.user-profile {
+    display: flex;
+    flex-direction: column;   /* L'un en dessous de l'autre */
+    align-items: flex-start;  /* Strictement aligné à gauche */
+    gap: 4px;                 /* Espace léger entre les deux lignes */
+}
+
+.user-info-text { 
+    color: white;
     font-size: 0.9em; 
 }
+
 .btn-logout { 
     color: #f87171; 
     text-decoration: none; 
@@ -97,20 +104,24 @@ button:hover { background-color: #1d4ed8; }
     text-align: center;
 }
 
-/* Tableaux (Vue Responsable) */
-.table-responsive { overflow-x: auto; }
+/* Tableaux */
+.table-responsive { 
+    width: 100%;
+    overflow-x: auto; 
+    -webkit-overflow-scrolling: touch;
+}
 table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; }
 th, td { padding: 14px; text-align: left; border-bottom: 1px solid #e2e8f0; }
 th { background-color: #334155; color: white; font-weight: 600; }
 
-/* CODE COULEUR STRICT PAR MÉTIER (Lignes du tableau) */
-.row-elec { background-color: #fef2f2; color: #991b1b; }       /* Fond rouge très clair, texte rouge foncé */
+/* Code couleur strict par métier */
+.row-elec { background-color: #fef2f2; color: #991b1b; }       
 .row-elec td strong { color: #dc2626; }
 
-.row-assain { background-color: #f0fdf4; color: #166534; }     /* Fond vert très clair, texte vert foncé */
+.row-assain { background-color: #f0fdf4; color: #166534; }     
 .row-assain td strong { color: #16a34a; }
 
-.row-eau { background-color: #f0f9ff; color: #075985; }        /* Fond bleu très clair, texte bleu foncé */
+.row-eau { background-color: #f0f9ff; color: #075985; }        
 .row-eau td strong { color: #0284c7; }
 
 .badge-etat { 
@@ -121,14 +132,17 @@ th { background-color: #334155; color: white; font-weight: 600; }
     font-size: 0.9em; 
     font-weight: 500;
 }
-.table-responsive {
-    width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-}
 
 /* Ajustements spécifiques pour les téléphones */
 @media (max-width: 768px) {
+    .navbar {
+        padding: 10px 15px; /* Réduit l'espacement sur mobile */
+    }
+    
+    .user-profile {
+        max-width: 70%;     /* Laisse la place pour le bouton déconnexion */
+    }
+
     .filters-section, form {
         display: flex;
         flex-direction: column;
