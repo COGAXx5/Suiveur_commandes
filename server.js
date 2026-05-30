@@ -96,7 +96,7 @@ app.get('/api/commandes/mes-saisies', async (req, res) => {
     }
 });
 
-// [NOUVEAU] Route de modification de l'état d'une commande
+// Route de modification de l'état d'une commande (Adaptée pour ID int4)
 app.put('/api/commandes/:id', async (req, res) => {
     if (!req.session.userId || req.session.role !== 'ca') return res.status(403).json({ error: 'Accès refusé' });
     
@@ -104,8 +104,9 @@ app.put('/api/commandes/:id', async (req, res) => {
     const { etat } = req.body;
 
     try {
+        // Le ::int4 force la conversion de l'ID pour PostgreSQL
         const result = await db.query(
-            `UPDATE commandes SET etat = $1, updated_at = NOW() WHERE id = $2 AND cree_par = $3`,
+            `UPDATE commandes SET etat = $1, updated_at = NOW() WHERE id = $2::int4 AND cree_par = $3`,
             [etat, id, req.session.username]
         );
         
