@@ -15,11 +15,13 @@ app.use(session({
     resave: false,
     saveUninitialized: false
 }));
+
 // Force le bon type MIME pour le fichier CSS
 app.get('/style.css', (req, res) => {
     res.setHeader('Content-Type', 'text/css');
     res.sendFile(path.join(__dirname, 'style.css'));
 });
+
 // Déclaration explicite de toutes les routes HTML pour Vercel
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
@@ -89,6 +91,29 @@ app.get('/api/commandes/mes-saisies', async (req, res) => {
     try {
         const result = await db.query("SELECT * FROM commandes WHERE cree_par = $1 ORDER BY id DESC", [req.session.username]);
         res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// [NOUVEAU] Route de modification de l'état d'une commande
+app.put('/api/commandes/:id', async (req, res) => {
+    if (!req.session.userId || req.session.role !== 'ca') return res.status(403).json({ error: 'Accès refusé' });
+    
+    const { id } = req.params;
+    const { etat } = req.body;
+
+    try {
+        const result = await db.query(
+            `UPDATE commandes SET etat = $1, updated_at = NOW() WHERE id = $2 AND cree_par = $3`,
+            [etat, id, req.session.username]
+        );
+        
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: "Commande non trouvée ou non autorisée" });
+        }
+        
+        res.json({ success: true, message: "État mis à jour avec succès" });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
